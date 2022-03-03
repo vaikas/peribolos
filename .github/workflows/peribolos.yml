@@ -1,0 +1,37 @@
+name: Peribolos testing
+# TODO(vaikas): Do actually something
+on:
+  push:
+    branches: [ playground ]
+jobs:
+  peribolos:
+    name: Peribolos testing
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # undocumented OIDC support.
+      packages: write
+      contents: read
+
+    steps:
+    - name: Set up Go 1.17.x
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.17.x
+
+    - name: Add GOPATH/bin to PATH
+      shell: bash
+      run: |
+        echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+    - name: Check out our repo
+      uses: actions/checkout@v2
+      with:
+        path: ./src/github.com/${{ github.repository }}
+
+    - name: Run peribolos
+      working-directory: ./src/github.com/${{ github.repository }}
+      shell: bash
+      run: |
+        go run ./main.go --dump --dump-full
+
